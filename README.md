@@ -23,3 +23,4 @@ Current Iteration
 Iteration 1: Repository foundation and Git workflow setup.
 
 Future iterations will add the PyTorch model, Docker containerization, Kubernetes deployment, and end-to-end validation.
+Added extra details
