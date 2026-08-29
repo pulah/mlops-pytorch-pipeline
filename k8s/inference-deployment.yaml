@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlops-inference
+  namespace: mlops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlops-inference
+  template:
+    metadata:
+      labels:
+        app: mlops-inference
+    spec:
+      containers:
+        - name: inference
+          image: mlops-pytorch-serve:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: mlops-config
+          volumeMounts:
+            - name: mlops-storage
+              mountPath: /app/checkpoints
+              subPath: checkpoints
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+      volumes:
+        - name: mlops-storage
+          persistentVolumeClaim:
+            claimName: mlops-storage

@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mlops-training
+  namespace: mlops
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: trainer
+          image: mlops-pytorch-train:dev
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: mlops-config
+          volumeMounts:
+            - name: mlops-storage
+              mountPath: /app/data
+              subPath: data
+            - name: mlops-storage
+              mountPath: /app/checkpoints
+              subPath: checkpoints
+      volumes:
+        - name: mlops-storage
+          persistentVolumeClaim:
+            claimName: mlops-storage
