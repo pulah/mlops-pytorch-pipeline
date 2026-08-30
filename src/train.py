@@ -1,6 +1,11 @@
-import json
+import os
+import sys
 from pathlib import Path
 
+# Add the parent directory of 'src' to sys.path to enable executing train.py directly
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+import json
 import torch
 import torch.nn as nn
 import yaml
@@ -147,7 +152,8 @@ def should_stop_early(
 
 
 
-def main(config_path: str = "configs/training_config.yaml") -> None:
+def main() -> None:
+    config_path = os.environ.get("CONFIG_PATH", "configs/training_config.yaml")
     config = load_config(config_path)
 
     (

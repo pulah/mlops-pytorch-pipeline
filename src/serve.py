@@ -1,3 +1,9 @@
+import sys
+from pathlib import Path
+
+# Add the parent directory of 'src' to sys.path to enable executing serve.py directly or via uvicorn
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+
 import torch
 from fastapi import FastAPI, File, UploadFile
 from PIL import Image
@@ -47,9 +53,9 @@ def health():
 
 
 @app.post("/predict")
-async def predict(file: UploadFile = File(...)):
-    image = Image.open(file.file).convert("RGB")
-    tensor = transform(image).unsqueeze(0).to(device)
+async def predict(image: UploadFile = File(...)):
+    img = Image.open(image.file).convert("RGB")
+    tensor = transform(img).unsqueeze(0).to(device)
 
     with torch.no_grad():
         outputs = model(tensor)
