@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: mlops-training
-  namespace: mlops
+  namespace: ml-training
 spec:
   backoffLimit: 0
   template:
@@ -10,19 +10,39 @@ spec:
       restartPolicy: Never
       containers:
         - name: trainer
-          image: mlops-pytorch-train:dev
+          image: mlops-train:v1
           imagePullPolicy: IfNotPresent
-          envFrom:
-            - configMapRef:
-                name: mlops-config
+          env:
+            - name: CONFIG_PATH
+              value: /app/configs/training_config.yaml
+          resources:
+            requests:
+              cpu: "2"
+              memory: "4Gi"
+              nvidia.com/gpu: "1"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+              nvidia.com/gpu: "1"
           volumeMounts:
-            - name: mlops-storage
+            - name: storage-volume
               mountPath: /app/data
               subPath: data
-            - name: mlops-storage
+            - name: storage-volume
               mountPath: /app/checkpoints
               subPath: checkpoints
+            - name: config-volume
+              mountPath: /app/configs
+      nodeSelector:
+        accelerator: nvidia-gpu
+      tolerations:
+        - key: "gpu"
+          operator: "Exists"
+          effect: "NoSchedule"
       volumes:
-        - name: mlops-storage
+        - name: storage-volume
           persistentVolumeClaim:
-            claimName: mlops-storage
+            claimName: checkpoints-pvc
+        - name: config-volume
+          configMap:
+            name: training-config

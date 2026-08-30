@@ -1,14 +1,12 @@
-FROM python:3.14-slim
-
+# Stage 1: Base with dependencies
+FROM python:3.11-slim AS base
 WORKDIR /app
+COPY requirements/train.txt .
+RUN pip install --no-cache-dir -r train.txt
 
-COPY requirements/train.txt requirements/train.txt
-
-RUN pip install --no-cache-dir -r requirements/train.txt
-
-COPY src/ src/
-COPY configs/ configs/
-
-RUN mkdir -p /app/data /app/checkpoints
-
-CMD ["python", "-m", "src.train"]
+# Stage 2: Training runtime
+FROM base AS training
+COPY src/ ./src/
+COPY configs/ ./configs/
+ENV PYTHONUNBUFFERED=1
+ENTRYPOINT ["python", "src/train.py"]
