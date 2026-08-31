@@ -1,3 +1,9 @@
+import sys
+from pathlib import Path
+
+# Add the repository root directory to sys.path to enable imports of the src package
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+
 import pytest
 import torch
 import torch.nn as nn
